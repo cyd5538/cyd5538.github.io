@@ -3,7 +3,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: '내 공부 저장소',
+  title: '내 공부 저장소입니다',
   tagline: 'Study with me',
   favicon: 'img/favicon.ico',
 
