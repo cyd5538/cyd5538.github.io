@@ -55,7 +55,10 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Replace with your project's social card
+    tableOfContents: {
+      minHeadingLevel: 2,
+      maxHeadingLevel: 4,
+    },
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
       title: 'Yjin',
