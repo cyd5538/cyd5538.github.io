@@ -87,6 +87,7 @@ function findMinValue(list) {
 - Θ-표기(“Big-theta”) → 점근적 상한과 하한을 동시에 표시
 
 일반적으로 빅오(Big-O) 표기법이 가장 많이 사용
+![image](https://github.com/cyd5538/cyd5538.github.io/assets/91642972/605d4e77-c0e7-4d6d-9e46-95862d1c6220)
 
  O(1) < O(logn) < O(n) < O(nlogn) < O(n2) < O(n3) < O(2n)
 
