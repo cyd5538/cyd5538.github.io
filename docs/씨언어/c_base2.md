@@ -191,3 +191,5 @@ int main() {
 | *      | 내용 연산자로서 피 연산자의 내용을 가져옵니다.   | `*ptr`                 |
 
 ### 연산자 우선순위
+![image](https://github.com/cyd5538/cyd5538.github.io/assets/91642972/913bc5a2-0db8-48ea-ac5f-aed1c89e3fa5)
+[이미지 출처](https://velog.io/@mingkimk/%EC%A0%95%EB%B3%B4%EC%B2%98%EB%A6%AC%EA%B8%B0%EC%82%AC-%EB%AC%B8%EC%A0%9C-%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D-%EC%96%B8%EC%96%B4-%ED%99%9C%EC%9A%A9-2021%EB%85%84-2%ED%9A%8C-A)
