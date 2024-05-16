@@ -5,7 +5,7 @@
 <meta name="generator" content="Docusaurus v3.1.1">
 <title data-rh="true">교착상태 | 내 공부 저장소입니다</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://cyd5538.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://cyd5538.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://cyd5538.github.io/docs/운영체제/deadlock"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="교착상태 | 내 공부 저장소입니다"><meta data-rh="true" name="description" content="운영체제에서 교착 상태(Deadlock)는 둘 이상의 프로세스가 서로 필요한 자원을 점유하고 있어서 어느 프로세스도 진행될 수 없는 상태를 말합니다."><meta data-rh="true" property="og:description" content="운영체제에서 교착 상태(Deadlock)는 둘 이상의 프로세스가 서로 필요한 자원을 점유하고 있어서 어느 프로세스도 진행될 수 없는 상태를 말합니다."><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://cyd5538.github.io/docs/운영체제/deadlock"><link data-rh="true" rel="alternate" href="https://cyd5538.github.io/docs/운영체제/deadlock" hreflang="en"><link data-rh="true" rel="alternate" href="https://cyd5538.github.io/docs/운영체제/deadlock" hreflang="x-default"><link rel="alternate" type="application/rss+xml" href="/blog/rss.xml" title="내 공부 저장소입니다 RSS Feed">
 <link rel="alternate" type="application/atom+xml" href="/blog/atom.xml" title="내 공부 저장소입니다 Atom Feed"><link rel="stylesheet" href="/assets/css/styles.3323e96a.css">
-<script src="/assets/js/runtime~main.2e8d3cdb.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.d91415d4.js" defer="defer"></script>
 <script src="/assets/js/main.d6f4aa03.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -64,6 +64,54 @@
 <li>모든 자 원에 일련번호를 부여하고, 프로세스가 자원을 요구할 때 일련번호에 따라 요구 순서를 조절하여 환형대기를 방지</li>
 </ul>
 </li>
-</ol></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="theme-doc-footer-edit-meta-row row"><div class="col"><a href="https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/운영체제/deadlock.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_vwxv"></div></div></footer></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/운영체제/concurrent_process"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">병행 프로세스</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/category/알고리즘"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">알고리즘</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#교착상태-필요조건" class="table-of-contents__link toc-highlight">교착상태 필요조건</a></li><li><a href="#자원할당-그래프" class="table-of-contents__link toc-highlight">자원할당 그래프</a></li><li><a href="#교착상태-예방-방법" class="table-of-contents__link toc-highlight">교착상태 예방 방법</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2024 Yjin document.</div></div></div></footer></div>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="교착상태-회피">교착상태 회피<a href="#교착상태-회피" class="hash-link" aria-label="Direct link to 교착상태 회피" title="Direct link to 교착상태 회피">​</a></h2>
+<p>교착상태 회피는 운영체제에서 교착상태 발생을 사전에 방지하는 기법입니다.</p>
+<p>교착상태 회피는 안전 상태라는 개념을 사용하여 작동합니다. 안전 상태는 모든 프로세스가 최대 자원량을 요청하더라도 교착상태에 빠지지 않는 상태를 의미합니다. 시스템은 자원 할당을 수행하기 전에 항상 안전 상태인지 확인하고, 안전 상태가 유지될 수 있는 방식으로만 자원을 할당합니다.</p>
+<ul>
+<li>안전 상태: 모든 프로세스가 최대 자원량을 요청하더라도 교착상태에 빠지지 않는 상태(안전순서열이 존재하는 경우)</li>
+<li>불안전 상태: 안전 상태가 아닌 상태. 교착상태가 발생할 가능성이 있는 상태(안전순서열이 존재하지 않는 경우)</li>
+<li>안전 순서열: 안전 상태에서 시작하여 순차적으로 프로세스를 진행했을 때 교착상태가 발생하지 않는 프로세스들의 순서</li>
+</ul>
+<ol>
+<li>시스템은 모든 프로세스의 자원 사용에 대한 정보를 수집합니다.(현재 할당된 자원, 필요한 자원, 프로세스 최대 요구량)</li>
+<li>안전 상태인지 확인</li>
+<li>안전 상태가 아닌 경우 안전 순서열에 따라 프로세스를 진행</li>
+<li>프로세스가 자원을 사용한 경우 반납하고 다른 프로세스에 적용</li>
+</ol>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="교착-상태-회피-알고리즘">교착 상태 회피 알고리즘<a href="#교착-상태-회피-알고리즘" class="hash-link" aria-label="Direct link to 교착 상태 회피 알고리즘" title="Direct link to 교착 상태 회피 알고리즘">​</a></h3>
+<p>교착상태 발생을 사전에 방지하는 데 사용되는 알고리즘</p>
+<ol>
+<li>각 자원의 단위 자원이 하나밖에 없는 경우<br>
+<strong>변형된 자원 할당 그래프 이용</strong>: 프로세스와 자원 간의 관계를 그래프로 표현하고, 그래프의 순환을 통해 교착상태 가능성을 검사</li>
+<li>각 자원의 단위 자원이 여러개인 경우
+<strong>은행원 알고리즘</strong> : 프로세스가 필요로 하는 자원의 최대량과 현재 할당된 자원량을 기반으로 안전 상태를 판단하고 자원을 할당하는 알고리즘</li>
+</ol>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="교착상태-탐지-및-복구">교착상태 탐지 및 복구<a href="#교착상태-탐지-및-복구" class="hash-link" aria-label="Direct link to 교착상태 탐지 및 복구" title="Direct link to 교착상태 탐지 및 복구">​</a></h2>
+<p>교착상태를 발생한 후 탐지하고 해결하는 기법입니다.</p>
+<ul>
+<li>교착상태 탐지<!-- -->
+<ul>
+<li>주기적으로 상태 조사 알고리즘을 수행하여 교착상태 여부를 확인합니다</li>
+</ul>
+</li>
+<li>교차상태 복구<!-- -->
+<ul>
+<li>교착상태가 탐지된 경우, 적절한 조치를 취하여 정상 상태로 복귀</li>
+</ul>
+</li>
+</ul>
+<p><strong>시스템이 교착상태에 있는지 교착상태를 탐지하는 shoshani와 coffman 알고리즘</strong>
+간단하고 효율적이지만 시간복잡도가 O(V2)로 높다.</p>
+<p><strong>교차상태 복구</strong></p>
+<ul>
+<li>교착상태를 일으킨 프로세스를 종료<!-- -->
+<ul>
+<li>진행중이던 프로세스를 종료하면 데이터 손실 가능성도 있고 다시 복구가 어려움</li>
+</ul>
+</li>
+<li>교착상태를 일으킨 프로세스들의 자원을 취소</li>
+<li>교착상태에 있는 프로세스를 차지하고 있는 자원을 다른 프로세스에 재할당</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="theme-doc-footer-edit-meta-row row"><div class="col"><a href="https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/운영체제/deadlock.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_vwxv"></div></div></footer></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/운영체제/concurrent_process"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">병행 프로세스</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/category/알고리즘"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">알고리즘</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#교착상태-필요조건" class="table-of-contents__link toc-highlight">교착상태 필요조건</a></li><li><a href="#자원할당-그래프" class="table-of-contents__link toc-highlight">자원할당 그래프</a></li><li><a href="#교착상태-예방-방법" class="table-of-contents__link toc-highlight">교착상태 예방 방법</a></li><li><a href="#교착상태-회피" class="table-of-contents__link toc-highlight">교착상태 회피</a><ul><li><a href="#교착-상태-회피-알고리즘" class="table-of-contents__link toc-highlight">교착 상태 회피 알고리즘</a></li></ul></li><li><a href="#교착상태-탐지-및-복구" class="table-of-contents__link toc-highlight">교착상태 탐지 및 복구</a></li></ul></div></div></div></div></main></div></div></div><footer class="footer"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2024 Yjin document.</div></div></div></footer></div>
 </body>
 </html>
