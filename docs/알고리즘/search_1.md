@@ -34,12 +34,13 @@ sidebar_position: 4
 - 최악의 경우 비효율적(데이터가 배열 마지막의 있을 경우)
 
 ### 코드
-```C
-int sequentialSearch(int array[], int n, int m, int value) {
-    int i;
-    for (i = n; i <= m; i++)
-        if (array[i] == value)
+```js
+function sequentialSearch(array, n, m, value) {
+    for (let i = n; i <= m; i++) {
+        if (array[i] === value) {
             return i;
+        }
+    }
     return -1;
 }
 ```
@@ -70,41 +71,28 @@ int sequentialSearch(int array[], int n, int m, int value) {
 - 순차 탐색에 비해 구현이 다소 복잡합니다.
 
 ### 코드
-```C
+```js
+function binarySearch(arr, elem) {
+  let start = 0;
+  let end = arr.length - 1;
+  let middle = Math.floor((start + end) / 2);
 
-#include <stdio.h>
-
-int binary_search(int array[], int n, int value) {
-  int low = 0;
-  int high = n - 1;
-
-  while (low <= high) {
-    int mid = (low + high) / 2;
-    if (array[mid] == value) {
-      return mid;
-    } else if (array[mid] < value) {
-      low = mid + 1;
+  while (arr[middle] !== elem && start <= end) {
+    if (elem < arr[middle]) {
+      end = middle - 1;
     } else {
-      high = mid - 1;
+      start = middle + 1;
     }
+
+    middle = Math.floor((start + end) / 2);
+  }
+
+  if (arr[middle] === elem) {
+    return middle;
   }
 
   return -1;
 }
 
-int main() {
-  int array[] = {1, 3, 5, 7, 9};
-  int n = sizeof(array) / sizeof(array[0]);
-  int value = 7;
-
-  int index = binary_search(array, n, value);
-
-  if (index == -1) {
-    printf("값을 찾을 수 없습니다.\n");
-  } else {
-    printf("값 %d는 인덱스 %d에 있습니다.\n", value, index);
-  }
-
-  return 0;
-}
+console.log(binarySearch([2, 5, 6, 9, 13, 15, 28], 13));
 ```

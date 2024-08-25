@@ -22,18 +22,15 @@ sidebar_position: 4
 4. 찾고자 하는 값이 현재 노드의 값보다 작다면 왼쪽에 대해 재귀.
 5. 찾고자 하는 값이 현재 노드의 값보다 크다면 오른쪽에 대해 재귀.
 6. 값이 없다면 null 반환
-```C
-Node* search(Node* root, int data) {
-    // 값을 찾은 경우
-    if (root == NULL || root->data == data) {
+```js
+function search(root, data) {
+    if (root === null || root.data === data) {
         return root;
     }
-    // 값이 현재 노드보다 작은 경우
-    if (data < root->data) {
-        return search(root->left, data);
-    // 값이 현재 노드보다 큰 경우
+    if (data < root.data) {
+        return search(root.left, data);
     } else {
-        return search(root->right, data);
+        return search(root.right, data);
     }
 }
 ```
@@ -58,42 +55,39 @@ Node* search(Node* root, int data) {
 ③ 이 노드를 삭제할 노드의 자리에 올리고, 이 노드의 원래 위치는 비워집니다.
 
 ```C
-Node* deleteNode(Node* root, int key) {
-    if (root == NULL) {
+function minValueNode(node) {
+    let current = node;
+    while (current.left !== null) {
+        current = current.left;
+    }
+    return current;
+}
+
+function deleteNode(root, key) {
+    if (root === null) {
         return root;
     }
 
-    if (key < root->data) {
-        root->left = deleteNode(root->left, key);
-    } else if (key > root->data) {
-        root->right = deleteNode(root->right, key);
-    } else { // 삭제할 노드를 찾은 경우
-        // 단말 노드 
-        if (root->left == NULL && root->right == NULL) {
-            free(root);
-            return NULL;
-        } 
-        // 자식이 하나인 노드 
-        else if (root->left == NULL) {
-            Node* temp = root->right;
-            free(root);
-            return temp;
-        } else if (root->right == NULL) {
-            Node* temp = root->left;
-            free(root);
-            return temp;
+    if (key < root.data) {
+        root.left = deleteNode(root.left, key);
+    } else if (key > root.data) {
+        root.right = deleteNode(root.right, key);
+    } else {
+        if (root.left === null && root.right === null) {
+            return null;
+        } else if (root.left === null) {
+            return root.right;
+        } else if (root.right === null) {
+            return root.left;
         }
-        
-        // 두 개의 자식을 가진 노드 
-        // 오른쪽 서브트리에서 가장 작은 값을 가진 노드를 찾습니다.
-        Node* temp = minValueNode(root->right);
-        // 찾은 노드의 값을 현재 노드로 복사합니다.
-        root->data = temp->data;
-        // 오른쪽 서브트리에서 복사한 값을 삭제합니다.
-        root->right = deleteNode(root->right, temp->data);
+
+        let temp = minValueNode(root.right);
+        root.data = temp.data;
+        root.right = deleteNode(root.right, temp.data);
     }
     return root;
 }
+
 ```
 
 ### 삽입 과정
@@ -101,26 +95,28 @@ Node* deleteNode(Node* root, int key) {
 2. 삽입하려는 값이 루트 노드의 값보다 작으면 왼쪽 서브 트리, 크다면 오른쪽 서브 트리
 3. 선택된 서브 트리를 탐색하며 비어있는 노드 찾기.
 4. 비어 있다면 값을 추가하고, 비어 있지않다면 재귀적으로 탐색
-```C
-Node* insert(Node* root, int data) {
-    if (root == NULL) {
+```js
+function createNode(data) {
+    return {
+        data: data,
+        left: null,
+        right: null
+    };
+}
+
+function insert(root, data) {
+    if (root === null) {
         return createNode(data);
     }
 
-    // 삽입할 값이 현재 노드의 값보다 작은 경우 왼쪽 서브 트리로 이동
-    if (data < root->data) {
-        root->left = insert(root->left, data);
-    } 
-    // 삽입할 값이 현재 노드의 값보다 큰 경우 오른쪽 서브 트리로 이동
-    else if (data > root->data) {
-        root->right = insert(root->right, data);
-    } 
-    // 중복된 값인 경우 에러
-    else {
-        return root;
+    if (data < root.data) {
+        root.left = insert(root.left, data);
+    } else if (data > root.data) {
+        root.right = insert(root.right, data);
+    } else {
+        return root; 
     }
 
-    // 삽입된 트리를 반환
     return root;
 }
 
