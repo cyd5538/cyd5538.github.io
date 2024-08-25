@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# 선택,버블,삽입,셀 정렬
+# 선택,버블,삽입
 
 ## 선택 정렬
 선택 정렬은 입력 배열에서 가장 작은 값부터 순서대로 '선택'하여 정렬하는 알고리즘입니다.
@@ -45,26 +45,30 @@ sidebar_position: 2
 - 안정적이지 않은 정렬 알고리즘입니다.
 
 ### 코드
-```c
-void selectionSort(int *list, const int n)
-{
-    int i, j, indexMin, temp;
+```js
+function selectionSort(array) {
+  const n = array.length;
+  for (let i = 0; i < n - 1; i++) {
+    let minIndex = i;
 
-    for (i = 0; i < n - 1; i++)
-    {
-        indexMin = i;
-        for (j = i + 1; j < n; j++)
-        {
-            if (list[j] < list[indexMin])
-            {
-                indexMin = j;
-            }
-        }
-        temp = list[indexMin];
-        list[indexMin] = list[i];
-        list[i] = temp;
+    for (let j = i + 1; j < n; j++) {
+      if (array[j] < array[minIndex]) {
+        minIndex = j;
+      }
     }
+
+    if (minIndex !== i) {
+      let temp = array[minIndex];
+      array[minIndex] = array[i];
+      array[i] = temp;
+    }
+  }
+
+  return array;
 }
+
+console.log(selectionSort([5, 4, 3, 2, 1]));
+
 ```
 
 
@@ -95,21 +99,29 @@ void selectionSort(int *list, const int n)
 - 데이터 개수가 많아질수록 정렬하는데 걸리는 시간이 증가하여 성능이 급격하게 저하됩니다.
 
 ### 코드
-```c
-int* bubble_sort(int arr[], int n) {
-    int i, j, temp;
-    for (i=n-1; i>0; i--) {
-        for (j=0; j<i; j++) {
-            if (arr[j] > arr[j+1]) {
-                temp = arr[j];
-                arr[j] = arr[j+1];
-                arr[j+1] = temp;
-            }
-        }
-    }
-    return arr;
+```js
+function bubbleSort(array) {x
+  for (let i = 0; i < array.length; i++) {
+    let swap;
 
+    for (let j = 0; j < array.length - 1 - i; j++) {
+      if (array[j] > array[j + 1]) {
+        swap = array[j];
+        array[j] = array[j + 1];
+        array[j + 1] = swap;
+      }
+    }
+
+    if (!swap) {
+      break;
+    }
+  }
+
+  return array;
 }
+
+console.log(bubbleSort([5, 4, 3, 2, 1]));
+
 ```
 
 
@@ -139,68 +151,26 @@ int* bubble_sort(int arr[], int n) {
 - 배열의 길이가 길어질수록 비효율적이다.
 
 ### 코드
-```c
-void insertion_sort ( int *data, int n )
-{
-  int i, j, remember;
-  for ( i = 1; i < n; i++ )
-  {
-    remember = data[(j=i)];
-    while ( --j >= 0 && remember < data[j] ){
-        data[j+1] = data[j];
+```js
+function insertionSort(array) {
+  for (let i = 1; i < array.length; i++) {
+    let cur = array[i];
+    let left = i - 1;
+
+    while (left >= 0 && array[left] > cur) {
+      array[left + 1] = array[left];
+      left--;
     }
-    data[j+1] = remember;
+    array[left + 1] = cur;
+
+    console.log(`${i}회전: ${array}`);
   }
+
+  return array;
 }
+
+console.log(insertionSort([5, 4, 3, 2, 1]));
+
 ```
 
 
-
-## 셀 정렬
-삽입정렬의 단점을 보완한 정렬입니다. 삽입 정렬은 인접한 두 원소를 비교하고 교환하는 방식으로 작동하지만, 
-셸 정렬은 특정 간격으로 떨어진 원소들을 비교하고 교환합니다. 이 간격을 점차 줄여나가면서 전체 배열을 정렬하는 방식입니다.   
-
-**시간의 복잡도**는 최선의 경우는 O(n log n)이지만, 최악의 경우는 O(n^2)입니다. **공간의 복잡도**는 O(1)입니다.
-
-![image](https://github.com/cyd5538/cyd5538.github.io/assets/91642972/69a7d645-b531-4918-b4ca-dabc0d35e6d4)  
-[이미지 출처](https://www.simplilearn.com/tutorials/data-structure-tutorial/shell-sort)
-
-### 동작 방식
-- h라는 간격을 먼저 설정합니다. 초기 간격으로는 h를 배열 길이의 절반으로 설정하고, 반복할 때마다 h를 2로 나눕니다.
-- 설정된 간격 h만큼 떨어진 원소들을 비교하고 삽입 정렬을 수행합니다.
-- h가 1이 될 때까지 위의 과정을 반복합니다.
-
-### 장점
-- 제자리 정렬 알고리즘입니다
-- 거의 정렬된 데이터에 효과적입니다.
-- 삽입 알고리즘을 기본으로 하기에 구현이 간단하고 이해하기 쉽습니다.
-- 삽입 정렬보다 빠르고 효율적입니다.
-
-### 단점
-- 최악의 경우 시간 복잡도는 O(n^2)입니다.
-- 간격 설정에 따라 성능이 크게 달라질 수 있습니다.
-- 불안정한 정렬 알고리즘입니다
-  동일한 값을 가진 원소의 순서가 정렬 전후로 바뀔 수 있습니다.
-
-### 코드
-```c
-void shell_sort(int *arr, int size) {
-  int h = size / 2;
-
-  while (h > 0) {
-    for (int i = h; i < size; i++) {
-      int temp = arr[i];
-      int j = i;
-
-      while (j >= h && arr[j - h] > temp) {
-        arr[j] = arr[j - h];
-        j -= h;
-      }
-
-      arr[j] = temp;
-    }
-
-    h /= 2;
-  }
-}
-```
