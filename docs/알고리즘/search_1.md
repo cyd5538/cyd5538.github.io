@@ -96,3 +96,42 @@ function binarySearch(arr, elem) {
 
 console.log(binarySearch([2, 5, 6, 9, 13, 15, 28], 13));
 ```
+
+## 최장 증가 부분 수열(LIS) 
+주어진 수열에서 증가하는 부분 수열 중 가장 긴 길이를 찾는 알고리즘 dp도 활용 가능
+
+```js
+function lisBinarySearch(nums) {
+  if (!nums || nums.length === 0) {
+    return 0;
+  }
+
+  const tails = []; // LIS를 구성하는 원소들을 저장
+  for (const num of nums) {
+    // tails 배열이 비어있거나 tails 배열에 마지막 원소보다 크다면 push
+    if (tails.length === 0 || num > tails[tails.length - 1]) {
+      tails.push(num);
+    } else {
+      // 이분 탐색으로 적절한 위치 찾기
+      let left = 0;
+      let right = tails.length - 1;
+      while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (tails[mid] < num) {
+          left = mid + 1;
+        } else {
+          right = mid;
+        }
+      }
+      tails[left] = num; // 적절한 위치의 원소 교체
+    }
+    console.log(tails)
+  }
+
+  return tails.length
+}
+
+// 예시
+const nums2 = [10, 22, 9, 33, 21, 50, 41, 60, 80];
+console.log(lisBinarySearch(nums2)); // 출력: 6
+```
