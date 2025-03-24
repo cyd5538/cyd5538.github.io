@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmy_website=self.webpackChunkmy_website||[]).push([[6739],{1285:e=>{e.exports=JSON.parse('{"label":"TypeScript","permalink":"/blog/tags/type-script","allTagsPath":"/blog/tags","count":1,"unlisted":false}')}}]);

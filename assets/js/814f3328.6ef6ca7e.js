@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmy_website=self.webpackChunkmy_website||[]).push([[7472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"\ud55c\uae00 \uc785\ub825 \uc2dc \uc774\ubca4\ud2b8 \uc911\ubcf5 \ubb38\uc81c \ud574\uacb0","permalink":"/blog/korean-input-tag-issue","unlisted":false}]}')}}]);
