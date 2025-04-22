@@ -1,0 +1,396 @@
+---
+sidebar_position: 3
+title: 가상 DOM(Virtual DOM)
+description: "리액트의 핵심 개념인 가상 DOM에 대해 알아봅시다."
+keywords: [React, Virtual DOM, 가상 DOM, 재조정, 성능 최적화]
+last_update:
+date: 2025-04-22
+author: Yjin
+tags: [React, 프론트엔드, 성능 최적화]
+slug: /react/virtualdom
+---
+
+import Collapsible from '@site/src/components/Collapsible';
+import Highlight from '@site/src/components/Highlight';
+
+
+# 가상 DOM
+
+## 가상 DOM이란
+<Highlight>가상 DOM(Virtual DOM)은 실제 DOM(Document Object Model)을 추상화한 자바스크립트 객체의 표현</Highlight>입니다. 
+실제 DOM이 브라우저에서 웹 페이지를 표현하는 노드 객체로 구성된 것과 달리, 가상 DOM은 단순한 자바스크립트 객체로 구성되어 있습니다.
+리액트의 핵심 아이디어는 UI의 이상적인 또는 "가상적인" 표현을 메모리에 유지하고, ReactDOM과 같은 라이브러리를 통해 실제 DOM과 동기화하는 것입니다. 이 과정을 <Highlight>재조정(Reconciliation)</Highlight>이라고 합니다.
+
+## 가상 DOM의 작동 방식
+리액트에서 UI 업데이트가 일어나는 과정은 다음과 같습니다
+1. 상태 변경: 컴포넌트의 상태(state)가 setState() 호출이나 다른 트리거에 의해 변경됩니다.
+2. 가상 DOM 업데이트: 리액트는 새로운 가상 DOM 트리를 생성합니다.
+3. 차이점 비교(Diffing): 리액트는 새로운 가상 DOM 트리와 이전 가상 DOM 트리를 비교해 차이점을 찾습니다.
+4. 일괄 업데이트: 찾아낸 차이점들을 기반으로 실제 DOM에 최소한의 변경사항만 일괄적으로 적용합니다.
+
+이러한 접근 방식은 다음과 같은 이점을 제공합니다
+- 성능 최적화: 실제 DOM 조작은 비용이 많이 들지만, 가상 DOM 조작은 메모리에서 이루어지므로 훨씬 빠릅니다.
+- 선언적 API: 개발자는 UI가 어떻게 보여야 하는지만 정의하면 됩니다. DOM 업데이트는 리액트가 알아서 처리합니다.
+- 크로스 플랫폼 호환성: 가상 DOM은 브라우저에 종속되지 않으므로, React Native와 같은 환경에서도 동일한 패턴을 사용할 수 있습니다.
+
+## 실제 DOM
+웹 브라우저는 HTML 문서를 파싱하여 DOM(Document Object Model)이라는 객체 모델로 변환합니다. <Highlight>DOM은 웹 페이지의 구조와 내용을 표현하는 트리 구조의 자바스크립트 객체</Highlight>입니다.  
+간단한 HTML 페이지의 DOM 구조는 다음과 같습니다
+```HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+</html>
+```
+이 HTML 페이지의 DOM 트리는 다음과 같은 구조를 가집니다
+
+```js
+{
+  "nodeName": "#document",
+  "childNodes": [
+    {
+      "nodeName": "#comment",
+      "nodeValue": "DOCTYPE html"
+    },
+    {
+      "nodeName": "html",
+      "attributes": {
+        "lang": "en"
+      },
+      "childNodes": [
+        {
+          "nodeName": "head",
+          "childNodes": [
+            {
+              "nodeName": "meta",
+              "attributes": {
+                "charset": "UTF-8"
+              }
+            },
+            {
+              "nodeName": "meta",
+              "attributes": {
+                "name": "viewport",
+                "content": "width=device-width, initial-scale=1.0"
+              }
+            },
+            {
+              "nodeName": "title",
+              "childNodes": [
+                {
+                  "nodeValue": "Document"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "nodeName": "body",
+          "childNodes": []
+        }
+      ]
+    }
+  ]
+}
+```
+실제 DOM에서는 이러한 노드들을 JavaScript를 사용하여 조작할 수 있습니다
+
+```js
+const bodyNode = document.querySelector('body');
+bodyNode.style.backgroundColor = 'blue';
+```
+
+### 실제 DOM의 문제점
+
+#### <Highlight>성능 이슈</Highlight>
+DOM 조작은 비용이 많이 드는 작업입니다. DOM을 변경할 때마다 다음과 같은 작업이 발생합니다.
+
+1. 스타일 재계산: 변경된 요소와 그 자식 요소의 스타일을 다시 계산합니다.
+2. 레이아웃 재계산(리플로우): 각 요소의 정확한 위치와 크기를 결정합니다.
+3. 리페인팅: 화면에 픽셀을 다시 그립니다.
+
+특히 복잡한 웹 애플리케이션에서는 이러한 작업이 빈번하게 발생하면 성능이 크게 저하될 수 있습니다.
+
+```js
+// 성능이 좋지 않은 코드 예시
+for (let i = 0; i < 1000; i++) {
+  const width = element.offsetWidth; // 레이아웃 정보 읽기 (강제 리플로우 발생)
+  element.style.width = (width + 1) + 'px'; // 레이아웃 변경 (다음 읽기에서 리플로우 필요)
+}
+```
+이런 문제를 해결하는 방법 중 하나는 레이아웃 정보 읽기와 쓰기를 분리하는 것입니다.
+
+```js
+const widths = [];
+// 먼저 모든 값을 읽음
+for (let i = 0; i < 1000; i++) {
+  widths.push(element.offsetWidth);
+}
+// 그 다음 모든 값을 씀
+for (let i = 0; i < 1000; i++) {
+  element.style.width = (widths[i] + 1) + 'px';
+}
+```
+
+또는 `getBoundingClientRect()`를 사용하여 한 번에 여러 레이아웃 속성을 가져오는 방법도 있습니다
+```js
+const rect = element.getBoundingClientRect();
+const width = rect.width;
+const height = rect.height; 
+
+element.style.width = `${width + 10}px`;
+element.style.height = `${height + 10}px`;
+```
+
+:::tip 레이아웃 스레싱
+레이아웃 스레싱(Thrashing)은 DOM 요소의 레이아웃 관련 속성을 읽고 쓰는 작업이 반복될 때 발생하는 불필요한 레이아웃 재계산을 의미합니다.
+이는 웹 페이지 성능을 크게 저하시켜 사용자 경험을 해칠 수 있습니다.
+:::
+
+#### <Highlight>DOM 선택과 성능</Highlight>
+DOM 요소를 선택하는 방법에 따라 성능이 달라질 수 있습니다
+- getElementById: 고유 ID를 기반으로 요소를 빠르게 찾습니다(O(1) 시간 복잡도).
+- querySelector/querySelectorAll: CSS 선택자로 요소를 찾지만, 트리 전체를 순회해야 할 수 있어 더 느릴 수 있습니다(최악의 경우 O(n) 시간 복잡도).
+
+```js
+// 일반적으로 더 빠름
+const element = document.getElementById('myElement');
+
+// 더 느릴 수 있음
+const element = document.querySelector('#myElement');
+```
+
+#### <Highlight>브라우저 간 호환성 문제</Highlight>
+각 브라우저마다 DOM API 구현이 다를 수 있어 일관된 웹 애플리케이션을 개발하기 어렵게 만듭니다. 이런 차이로 인해 다음과 같은 문제가 발생할 수 있습니다
+- 특정 DOM 메서드나 속성이 일부 브라우저에서 지원되지 않음
+- 이벤트 처리 방식의 차이
+- CSS 렌더링 차이
+
+### 가상 DOM과 합성 이벤트
+#### <Highlight>가상 DOM의 이점</Highlight>
+리액트의 가상 DOM은 앞서 언급한 실제 DOM의 여러 문제점을 해결합니다
+1. 효율적인 업데이트: 변경된 부분만 실제 DOM에 적용합니다.
+2. 일괄 처리: 여러 변경 사항을 모아서 한 번에 처리합니다.
+3. 선언적 프로그래밍: 개발자는 최종 상태만 정의하고, 리액트가 DOM 변경을 관리합니다.
+
+#### <Highlight>합성 이벤트(SyntheticEvent) 시스템</Highlight>
+리액트는 브라우저 간 호환성 문제를 해결하기 위해 합성 이벤트 시스템을 제공합니다
+
+1. <Highlight>통합 인터페이스</Highlight>  
+리액트의 합성 이벤트는 브라우저 네이티브 이벤트를 래핑하여 모든 브라우저에서 일관된 동작을 보장합니다
+```JSX
+function handleClick(event) {
+  // 모든 브라우저에서 동일하게 동작
+  event.preventDefault();
+  console.log(event.target.value);
+}
+
+<button onClick={handleClick}>클릭하세요</button>
+```
+
+2. <Highlight>이벤트 위임</Highlight>  
+리액트는 이벤트 위임 패턴을 사용하여 개별 DOM 노드가 아닌 최상위 컨테이너에 이벤트 리스너를 연결합니다. 이는 다음과 같은 이점을 제공합니다
+   - 메모리 사용량 감소
+   - 이벤트 처리 코드 단순화
+   - 동적으로 추가되는 요소에 대한 별도의 이벤트 바인딩이 필요 없음
+
+3. <Highlight>일관된 이벤트 동작</Highlight>  
+리액트의 합성 이벤트는 다양한 입력 요소에서 일관된 이벤트 동작을 제공합니다
+```jsx
+// 모든 입력 타입에서 동일하게 동작하는 onChange 이벤트
+<input type="text" onChange={handleChange} />
+<select onChange={handleChange}>...</select>
+<textarea onChange={handleChange}></textarea>
+```
+
+4. <Highlight>네이티브 이벤트 접근</Highlight>  
+필요한 경우 합성 이벤트를 통해 원본 브라우저 이벤트에 접근할 수 있습니다
+
+```jsx
+function handleClick(event) {
+  // 리액트 합성 이벤트
+  console.log(event.type);
+  
+  // 원본 브라우저 이벤트
+  const nativeEvent = event.nativeEvent;
+  console.log(nativeEvent.type);
+}
+```
+
+### 문서 조각
+<Highlight>문서 조각은 DOM 노드를 저장하는 가벼운 컨테이너입니다. </Highlight>
+기본 DOM에 영향을 주지 않고 여러 가지 업데이트를 수행할 수 있는 임시 저장소처럼 동작합니다. 문서 조각을 사용하면 DOM 조작의 성능을 크게 향상시킬 수 있습니다.
+
+#### <Highlight>문서 조각의 장점</Highlight>
+- 일괄 업데이트: 문서의 실제 DOM을 여러 번 개별적으로 업데이트하는 대신, 문서 조각 내의 모든 변경 사항을 일괄적으로 처리합니다.
+- 메모리 효율성: 문서 조각에 추가된 노드는 문서의 실제 DOM에서 제거됩니다. 이는 문서에서 큰 영역을 재정렬할 때 메모리 사용량을 최적화하는 데 도움이 됩니다.
+- 중복 렌더링 방지: 문서 조각은 활성화된 문서 DOM 트리에 속하지 않으므로 문서 조각을 변경해도 실제 문서에는 영향을 주지 않으며, 실제 DOM에 추가될 때까지 스타일과 스크립트가 적용되지 않습니다. 이를 통해 스타일 재계산과 스크립트 실행의 중복 수행을 방지합니다.
+
+#### <Highlight>vs 리액트의 가상 DOM</Highlight>
+리액트의 가상 DOM은 문서 조각 개념을 더 발전시킨 형태로 볼 수 있습니다.
+
+- 일괄 업데이트: 문서 조각과 유사하게 리액트의 가상 DOM은 여러 변경 사항을 한꺼번에 일괄 처리합니다. 리액트는 상태나 프롭이 변경될 때 문서의 실제 DOM을 직접 변경하는 대신, 가상 DOM에 변경 사항을 먼저 적용합니다.
+- 효율적인 비교 알고리즘: 변경 사항이 적용되고 나면 리액트는 현재 가상 DOM과 이전 가상 DOM의 차이점을 확인합니다. 문서 조각이 직접적인 DOM 조작을 줄이듯, 이 과정 역시 실제 DOM에 필요한 변경만 이루어지게 합니다.
+- 단일 렌더링: 차이점이 식별되면 리액트는 단 한 번의 일괄 처리를 통해 실제 DOM을 업데이트합니다.
+
+<Highlight color="blue">문서 조각은 문서의 실제 DOM을 업데이트하기 전에 변경 사항을 그룹화하여 최적화하는 기본적인 방법을 제공합니다. 반면, 리액트의 가상 DOM은 한 걸음 더 나아가 애플리케이션 UI 전반에 걸쳐 영리하게 차이점을 파악하고 일괄적으로 업데이트를 처리해 렌더링의 효율성을 극대화합니다. </Highlight>
+
+## 가상 DOM 작동 방식
+리액트의 가상 DOM(Virtual DOM) 시스템은 웹 애플리케이션의 성능을 최적화하는 핵심 메커니즘입니다. 가상 DOM의 작동 방식을 이해하려면 먼저 가상 DOM의 기본 단위인 리액트 엘리먼트에 대해 알아야 합니다.
+
+### 리액트 엘리먼트
+리액트에서 사용자 인터페이스는 컴포넌트 또는 HTML 엘리먼트의 가벼운 형태인 리액트 엘리먼트의 트리로 표현됩니다. 
+리액트 엘리먼트는 `React.createElement` 함수를 사용해 생성되며, 엘리먼트를 중첩해 복잡한 사용자 인터페이스를 만들 수 있습니다.
+
+```jsx
+const element = React.createElement(
+  'div',
+  { className: 'container' },
+  React.createElement('h1', null, 'Hello, World!'),
+);
+```
+이렇게 하면 리액트 엘리먼트가 생성됩니다. 여기서 `console.log(element)`를 찍어보면 다음과 같은 결과를 얻을 수 있습니다
+
+```js
+{
+  $$typeof: Symbol(react.element),
+  type: 'div',
+  key: null,
+  ref: null,
+  props: {
+    className: 'container',
+    children: [
+      {
+        $$typeof: Symbol(react.element),
+        type: 'h1',
+        key: null,
+        ref: null,
+        props: {
+          children: 'Hello, World!'
+        },
+        _owner: null,
+        _store: {}
+      }
+    ]
+  },
+  _owner: null,
+  _store: {}
+}
+```
+리액트 엘리먼트는 리액트 애플리케이션의 가장 작은 구성 블록으로, 화면에 표시되어야 할 내용을 설명합니다. 
+각 엘리먼트는 타입과 속성(props)을 가지고 있으며, 자식 엘리먼트를 포함할 수 있습니다. 
+이 엘리먼트는 리액트의 가상 DOM을 구성하는 기본 단위입니다.
+
+#### 리액트 엘리먼트의 구조
+
+`$$typeof`  
+객체가 유효한 리액트 엘리먼트인지 확인할 때 사용하는 특수한 심볼입니다. `Symbol(react.element)`로 설정되어 있으며, 보안상의 이유로 존재합니다. 
+주로 XSS 공격을 방지하는 데 도움이 됩니다. 
+JSON에는 Symbol 타입이 없기 때문에, 서버로부터 받은 JSON 데이터가 리액트 엘리먼트로 간주되는 것을 방지합니다.
+
+`type`    
+type 속성은 엘리먼트가 나타내는 컴포넌트의 종류를 정의합니다. 
+- 리액트 함수 컴포넌트(함수)
+- 리액트 클래스 컴포넌트(클래스)
+- 리액트 프래그먼트(React.Fragment)
+- 포털(ReactDOM.createPortal)
+리액트는 type을 확인하여 어떤 종류의 엘리먼트를 렌더링할지 결정합니다.
+
+`key`  
+리액트가 엘리먼트 목록에서 각 항목을 고유하게 식별하는 데 사용하는 특별한 문자열 또는 숫자입니다. 
+주로 목록 렌더링 시 재조정(reconciliation) 과정에서 성능을 최적화하기 위해 사용됩니다.
+
+`ref`  
+부모 컴포넌트가 기본 DOM 노드나 컴포넌트 인스턴스에 접근할 수 있게 해주는 속성입니다. 
+보통 DOM을 직접 조작해야 하는 경우나 자식 컴포넌트의 메서드를 호출해야 할 때 사용합니다.
+
+`props`  
+컴포넌트에 전달된 모든 속성과 프롭을 포함하는 객체입니다. props는 불변으로 취급됩니다. 
+props.children은 특별한 프롭으로, 컴포넌트의 자식 엘리먼트를 나타냅니다.
+
+`_owner`  
+개발 모드에서만 접근할 수 있는 속성으로, 이 엘리먼트를 생성한 컴포넌트를 추적하기 위해 리액트에서 내부적으로 사용됩니다. 
+이 정보는 프롭이나 상태가 변경될 때 엘리먼트의 업데이트를 담당할 컴포넌트를 결정하는 데 사용됩니다.
+
+`_store`  
+리액트 엘리먼트 객체의 _store 속성은 엘리먼트에 대한 추가 데이터를 저장하기 위해 리액트가 내부적으로 사용하는 객체입니다. 
+_store에 저장된 속성 및 값은 공개 API의 일부가 아니므로 직접 접근해서는 안 됩니다.
+
+### 가상 DOM vs 실제 DOM
+리액트의 가상 DOM은 트리 같은 엘리먼트 구조를 표현한다는 점에서 실제 DOM과 유사합니다. 
+리액트 컴포넌트가 렌더링되면 리액트는 새 가상 DOM 트리를 생성하고 이전 가상 DOM 트리와 비교한 다음, 
+이전 트리를 새 트리와 일치하도록 업데이트하는 데 필요한 최소 변경 횟수를 계산합니다.
+
+```js
+function App() {
+  const [count, setCount] = useState(0);
+
+  return React.createElement(
+    'div',
+    null,
+    React.createElement('h1', null, `카운트: ${count}`),
+    React.createElement('button', { onClick: () => setCount(count + 1) }, '증가')
+  )
+}
+```
+createElement를 호출할 때 첫 번째 인수는 HTML 태그 또는 리액트 컴포넌트의 이름, 두 번째 인수는 프롭 객체(없다면 null), 그 밖의 추가 인수는 자식 엘리먼트를 나타냅니다.
+
+컴포넌트가 처음 렌더링될 때 리액트는 다음과 같이 가상 DOM 트리를 생성합니다.
+```
+div 
+  ├── h1
+  │   └── 카운트: 0
+  └── button
+      └── 증가
+```
+버튼을 클릭하면 리액트는 다음과 같이 새로운 가상 DOM 트리를 생성합니다.
+```
+div 
+  ├── h1
+  │   └── 카운트: 1
+  └── button
+      └── 증가
+```
+그러면 리액트는 h1 엘리먼트의 텍스트 내용만 업데이트하면 된다고 계산하고 실제 DOM의 해당 부분만 업데이트합니다.
+
+### 효율적인 업데이트
+리액트 컴포넌트의 상태나 프롭이 변경되면 리액트는 업데이트된 사용자 인터페이스를 표현하는 새로운 리액트 엘리먼트 트리를 생성합니다. 그런 다음 비교 알고리즘을 사용해 새 트리를 이전 트리와 비교해 실제 DOM의 업데이트에 필요한 최소한의 변경 사항을 결정합니다.  
+비교 알고리즘은 리액트 엘리먼트의 새 트리를 이전 트리와 비교하고 둘의 차이점을 식별합니다. 비교는 재귀적으로 이루어집니다. 노드가 변경된 경우 리액트는 실제 DOM에서 해당 노드를 업데이트합니다. 노드가 추가되거나 제거된 경우 리액트는 실제 DOM에서 해당 노드를 추가하거나 제거합니다.  
+이렇게 새 트리와 이전 트리를 노드별로 비교해 트리의 어느 부분이 변경되었는지 알아내는 작업을 디핑이라고 하고, 이때 사용하는 알고리즘을 디핑 알고리즘이라고 합니다.
+
+:::note 디핑 알고리듬 작동 방식
+- 두 트리의 루트에 있는 노드가 다른 경우, 리액트는 기존 트리 전체를 새 트리로 대체합니다.
+- 루트 노드가 동일하다면 리액트는 노드의 속성이 변경된 경우에만 업데이트합니다.
+- 자식 노드가 다른 경우 리액트는 변경된 자식 노드만 업데이트합니다. 리액트는 하위 트리 전체를 다시 생성하지 않고 변경된 노드만 업데이트합니다.
+- 노드의 자식들이 동일하지만 순서가 변경된 경우, 리액트는 노드를 다시 생성하지 않고 실제 DOM에서 노드의 순서만 변경합니다.
+- 트리에서 노드가 제거되면 리액트는 실제 DOM에서 해당 노드를 제거합니다.
+- 트리에 새 노드가 추가되면 리액트는 실제 DOM에 새 노드를 추가합니다.
+- 노드에 종류가 변경된 경우 리액트는 기존 노드를 제거하고 새 노드를 추가합니다.
+- 노드에 key 프롭이 있다면 리액트는 key를 사용해 노드의 교체가 필요한지 확인합니다.
+:::
+
+리액트의 디핑 알고리즘은 효율적이며, 변경을 최소화해 실제 DOM을 빠르게 업데이트하게 해 줍니다. 
+이를 통해 리액트 애플리케이션의 성능을 개선하고 복잡하고 동적인 사용자 인터페이스를 더 쉽게 구축할 수 있습니다.
+
+
+#### <Highlight>불필요한 리렌더링</Highlight>
+리액트의 디핑 알고리즘은 필요한 변경 사항을 최소화해 실제 DOM을 업데이트합니다. 
+하지만 때때로 불필요한 리렌더링이 발생할 수 있습니다. 이 방식은 크고 복잡한 애플리케이션에서 성능 저하를 초래할 수 있습니다.
+
+적절한 메모이제이션 기법을 사용하면 React 애플리케이션의 성능을 크게 향상시킬 수 있으며, 특히 대규모 애플리케이션에서 불필요한 렌더링으로 인한 성능 문제를 예방할 수 있습니다.
+
+<Collapsible title="예상 인터뷰">
+  <ol>
+    <li>DOM이란?, 가상 DOM과 다른 점은?</li>
+    <li>문서 조각이란?, 리액트의 가상 DOM과의 차이점은?</li>
+    <li>DOM에서 문제가 되는 사안은?</li>
+    <li>리액트에서의 렌더링은 어떻게 작동하나요?</li>
+  </ol>
+</Collapsible>
