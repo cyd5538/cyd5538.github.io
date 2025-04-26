@@ -1,0 +1,236 @@
+---
+sidebar_position: 5
+title: React 성능 최적화 기법
+description: React 성능 최적화 기법을 알아봅니다.
+keywords: [React, Performance Optimization, 리액트 성능 최적화]
+last_update:
+  date: 2025-04-26
+  author: Yjin
+tags: [React, Performance]
+slug: /react/performance-optimization
+---
+
+import Collapsible from '@site/src/components/Collapsible';
+import Highlight from '@site/src/components/Highlight';
+
+
+# 리액트 성능 최적화 기법
+
+## 메모화란?
+메모화는 컴퓨터 과학에서 이전에 계산된 결과를 캐싱해서 함수의 성능을 최적화하는 기법입니다. 
+간단히 말해 메모화는 입력값을 기준으로 함수의 출력을 저장해 두었다가 같은 입력을 사용해 함수를 다시 호출하면 출력을 다시 계산하지 않고 캐시된 결과를 반환합니다.
+
+이를 통해 특히 계산 비용이 많이 들거나 자주 호출되는 함수를 실행하는 데 필요한 시간과 리소스를 크게 줄일 수 있습니다. 
+<Highlight>메모화는 함수의 순수성을 따라야 합니다.</Highlight> 순수 함수는 동일한 입력에 대해 항상 동일한 출력을 예측 가능하게 반환해야 합니다.
+
+:::tip 순수 함수란?
+순수 함수는 다음과 같은 특징을 가진 함수입니다
+- 동일 입력, 동일 출력: 같은 인자를 전달하면 항상 같은 결과를 반환합니다.
+- 부수 효과 없음: 함수 외부의 상태를 변경하지 않습니다.
+- 외부 의존성 없음: 함수 내부에서 외부 변수나 상태에 의존하지 않습니다
+
+예를 들어, `add(2, 3)`은 항상 5를 반환해야 하며, 이 함수는 외부 상태를 변경하지 않아야 합니다. 이런 특성 때문에 순수 함수는 메모화에 이상적입니다.
+:::
+
+### 장점
+1. 성능 향상: 복잡한 계산을 반복적으로 수행하지 않아도 됩니다.
+2. 자원 절약: CPU 사용량과 메모리 사용을 줄일 수 있습니다.
+3. 응답 시간 개선: 특히 사용자 인터페이스에서 중요한 빠른 응답 시간을 제공합니다.
+
+### 단점
+1. 메모리 사용 증가: 결과를 저장하기 위한 추가 메모리가 필요합니다.
+2. 초기 설정 오버헤드: 캐시 구조를 설정하고 관리하는 데 약간의 오버헤드가 발생합니다.
+
+## React.memo
+React.memo는 함수형 컴포넌트의 렌더링 결과를 메모이제이션하는 고차 컴포넌트(HOC)입니다. 이를 통해 컴포넌트의 props가 변경되지 않았다면 리렌더링을 방지할 수 있습니다.
+
+React.memo는 프롭에 얕은 비교를 수행해 프롭의 변경 여부를 확인합니다. 문제는 자바스크립트에서 스칼라 타입은 매우 정확하게 비교할 수 있지만, 스칼라가 아닌 타입은 그렇지 않다는 것입니다.
+스칼라 타입
+원시 타입이라고 부르기도 하는 스칼라 타입 기본 자료형입니다.
+
+### 타입 비교의 이해
+<Highlight>스칼라 타입 (원시 타입)</Highlight>  
+- 문자열(String), 숫자(Number), 불리언(Boolean), null, undefined, Symbol
+- 값 자체가 직접 비교되기 때문에 정확한 비교가 가능합니다.
+- 예: "hello" === "hello" 는 true를 반환합니다.
+
+<Highlight>스칼라가 아닌 타입 (참조 타입)</Highlight>  
+- 객체(Object), 배열(Array), 함수(Function)
+- 메모리 주소를 비교하기 때문에 내용이 같아도 다른 참조면 다른 것으로 간주합니다.
+- 예: `{name: 'John'} === {name: 'John'}` 는 false를 반환합니다.
+
+### 예시
+```JSX
+import { memo, useState } from 'react';
+
+export default function MyApp() {
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  return (
+    <>
+      <label>
+        Name{': '}
+        <input value={name} onChange={e => setName(e.target.value)} />
+      </label>
+      <label>
+        Address{': '}
+        <input value={address} onChange={e => setAddress(e.target.value)} />
+      </label>
+      <Greeting name={name} />
+    </>
+  );
+}
+
+const Greeting = memo(function Greeting({ name }) {
+  console.log("Greeting was rendered at", new Date().toLocaleTimeString());
+  return <h3>Hello{name && ', '}{name}!</h3>;
+});
+```
+
+위의 예시에서 Greeting 컴포넌트는 name이 Props 중 하나이기 때문에 name이 변경될 때마다 리렌더링 됩니다. 
+하지만 address는 Greeting의 Props가 아니기 때문에 address가 변경될 때는 리렌더링되지 않습니다.
+
+
+
+
+### 언제 사용해야할까?
+1. 부모 컴포넌트가 자주 리렌더링되는 경우
+    - 부모 컴포넌트의 상태가 자주 변경되지만, 자식 컴포넌트에 전달되는 props는 변경되지 않는 경우
+2. 렌더링 비용이 높은 컴포넌트
+    - 복잡한 계산이나 많은 렌더링을 수행하는 컴포넌트
+3. 큰 리스트나 테이블의 아이템
+    - 데이터가 자주 변경되지 않는 리스트 아이템
+
+
+<Highlight>React.memo는 기본적으로 얕은 비교를 사용합니다. 즉, 객체나 배열과 같은 참조 타입의 경우, 메모이제이션이 제대로 작동하지 않을 수 있습니다. 
+이 경우, useMemo 또는 useCallback을 사용하여 메모이제이션을 수동으로 처리해야 합니다.</Highlight>   
+
+## useMemo
+useMemo는 React의 훅(Hook) 중 하나로, 계산 비용이 높은 연산의 결과값을 메모이제이션하여 성능을 최적화하는 데 사용됩니다. 
+이 훅은 특정 의존성 값이 변경될 때만 계산을 다시 수행하고, 그렇지 않으면 이전에 계산된 값을 재사용합니다.
+
+```jsx
+const cachedValue = useMemo(calculateValue, dependencies)
+```
+- calculateValue: 캐시할 값을 계산하는 순수 함수입니다. 인자를 받지 않으며, 컴포넌트 렌더링 시 한 번 실행되고, 이후 의존성이 변경될 때만 다시 실행됩니다.
+- dependencies: calculateValue 안에서 사용하는 모든 반응형 값(state, props 등) 의 배열입니다. 배열 안 값이 변경되면 calculateValue가 다시 호출됩니다.
+<Highlight>(React는 Object.is 비교를 사용하여 변경 여부를 판단합니다.)</Highlight>
+
+### 작동 방식
+1. 컴포넌트가 처음 렌더링될 때, calculateValue를 실행하고 결과를 저장합니다.
+2. 이후 렌더링에서는
+    - 의존성 배열의 값이 변경되지 않았다면 → 이전에 저장된 값을 재사용
+    - 의존성 배열이 변경되었다면 → calculateValue를 다시 실행하여 새로운 값을 저장하고 반환합니다.
+
+### 예시 
+```jsx
+const sortedItems = useMemo(() => {
+  return items.sort((a, b) => a.value - b.value);
+}, [items]);
+```
+`items`가 변경되지 않았다면, 정렬 연산을 다시 수행하지 않습니다.
+
+```jsx
+const expensiveValue = useMemo(() => {
+  let total = 0;
+  for (let i = 0; i < 1000000; i++) {
+    total += i;
+  }
+  return total;
+}, []);
+```
+- 복잡한 계산을 초기 렌더링에 한 번만 수행하고, 이후에는 캐시된 값을 사용합니다.
+
+### 언제 사용해야할까?
+- 복잡하거나 연산량이 많은 작업을 최적화할 때
+  - 예: 큰 배열을 필터링, 정렬, 가공하는 경우
+- 객체나 배열을 props로 넘길 때 참조 동일성을 유지하고 싶을 때
+  - (불필요한 자식 컴포넌트 리렌더링 방지)
+- 렌더링이 자주 발생하는 컴포넌트 내부에서 불필요한 계산을 피하고 싶을 때
+
+## useCallback
+useCallback은 React의 훅(Hook) 중 하나로, 함수를 메모이제이션하여 성능을 최적화하는 데 사용됩니다. 이 훅은 특정 의존성 값이 변경될 때만 함수를 다시 생성하고, 그렇지 않으면 동일한 함수 인스턴스를 재사용합니다.
+```jsx
+const cachedFunction = useCallback(fn, dependencies)
+```
+- fn: 메모이제이션할 콜백 함수입니다. 이 함수는 컴포넌트가 처음 렌더링될 때 생성되며, 의존성이 변경될 때만 다시 생성됩니다.
+- dependencies: fn 안에서 사용하는 모든 반응형 값(state, props 등)의 배열입니다. 배열 안 값이 변경되면 함수가 다시 생성됩니다. 
+<Highlight>(React는 Object.is 비교를 사용하여 변경 여부를 판단합니다.)</Highlight>
+
+### 작동 방식
+1. 컴포넌트가 처음 렌더링될 때, 지정된 함수를 생성하고 그 참조를 저장합니다.
+2. 이후 렌더링에서는
+    - 의존성 배열의 값이 변경되지 않았다면 → 이전에 저장된 함수 참조를 재사용
+    - 의존성 배열이 변경되었다면 → 함수를 다시 생성하여 새로운 참조를 저장하고 반환합니다.
+
+### 예시
+```jsx
+const handleSubmit = useCallback((event) => {
+  event.preventDefault();
+  saveData(formData);
+}, [formData]);
+```
+`formData`가 변경될 때만 handleSubmit 함수가 다시 생성됩니다.
+
+```jsx
+const incrementCounter = useCallback(() => {
+  setCount(prevCount => prevCount + 1);
+}, []);
+```
+빈 의존성 배열을 사용하면 함수가 컴포넌트 생명주기 동안 단 한 번만 생성됩니다.
+
+### 언제 사용해야 할까?
+1. 자식 컴포넌트에 콜백 함수를 props로 전달할 때
+자식 컴포넌트는 props가 "바뀌었다"고 느끼면 다시 렌더링됩니다.
+함수는 기본적으로 렌더링할 때마다 새로 만들어지기 때문에, 부모 컴포넌트가 렌더링될 때마다 함수도 새로 생성됩니다.
+이때 자식은 "props가 바뀌었네?"라고 인식하고 쓸데없이 리렌더링됩니다.
+그래서 함수의 참조를 고정하려고 useCallback을 사용합니다.
+
+```jsx
+const handleClick = useCallback(() => {
+  console.log('Button clicked');
+}, []);
+
+// <Child onClick={handleClick} />
+```
+→ handleClick이 매번 새로 생성되지 않고 고정되어, 자식 컴포넌트가 불필요한 리렌더링을 방지합니다.
+
+2. 함수가 다른 Hook의 의존성으로 사용될 때
+예를 들어 useEffect 안에서 어떤 함수를 사용하고 싶을 때, 그 함수가 매번 새로 만들어지면 문제가 발생할 수 있습니다.
+React는 의존성 배열을 참조값으로 비교하기 때문에, 함수가 새로 만들어지면 "의존성이 바뀌었네?"라고 판단하고 effect를 다시 실행합니다.
+useCallback을 사용해 함수의 참조를 고정하면, 불필요한 effect 재실행을 막을 수 있습니다.
+```jsx
+const fetchData = useCallback(() => {
+  // API 호출
+  fetch('https://api.example.com/data')
+    .then(response => response.json())
+    .then(data => setData(data));
+}, []);
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]);
+```
+→ fetchData가 고정되어 있어, 불필요하게 useEffect가 다시 실행되지 않습니다.
+
+
+3. 이벤트 핸들러가 복잡하거나 여러 상태나 props에 의존하는 경우
+함수 안에서 복잡한 계산을 하거나 여러 상태 및 props를 조합하는 경우, 매 렌더링마다 새로 만들 필요가 없습니다.
+useCallback을 사용해 한 번 만든 함수를 재사용하면 렌더링 성능을 최적화할 수 있습니다.
+특히 비싼 계산을 포함하는 함수라면 불필요한 함수 생성을 방지하는 것이 중요합니다.
+```jsx
+const handleComplexAction = useCallback(() => {
+  if (user.isLoggedIn && cart.items.length > 0) {
+    checkout(cart.items);
+  }
+}, [user, cart]);
+
+```
+→ 복잡한 로직을 포함한 함수를 매번 새로 만들지 않고 재사용할 수 있습니다.
+
+# 정리 ⭐
+- 계산량이 많은 작업 ➔ `useMemo`
+- 함수 참조 고정 ➔ `useCallback`
+- 컴포넌트 자체 메모화 ➔ `React.memo`
+
+모화는 잘 사용하면 렌더링 최적화에 큰 도움이 되지만, 남발하면 오히려 코드 복잡성과 메모리 사용량이 늘어날 수 있습니다. <Highlight>필요할 때만</Highlight> 전략적으로 사용하는 것이 중요합니다!
